@@ -12,7 +12,6 @@ for s in ['S', 'C', 'D', 'H']:  # setup deck of cards
 		t += 1
 # print(deckOG)
 del s, num
-print(d)
 
 
 class Player:
@@ -33,27 +32,6 @@ def setupPlayers ( num_players ):
 	for n in range(0, num_players):
 		playerList.append(Player(n))
 	return playerList
-
-
-def dealToPlayer ( deck: list = None, player: Player = None, cards_num=2 ):
-	for t in range(0, cards_num):
-		rnum = rand.randint(0, len(deck) - 1)
-		'''try:
-			print(rnum,deck[rnum])
-		except:
-			print(rnum/100,len(deck))'''
-		player.cards.append(deck[rnum])
-		deck.pop(rnum)
-	return deck
-
-
-def deal_to_Table ( deck ):
-	table = []
-	for n in range(0, 5):
-		rnum = rand.randint(0, len(deck) - 1)
-		table.append(deck[rnum])
-		deck.pop(rnum)
-	return deck, table
 
 
 def setValue ( player: Player = None ):  # ranks the hand
@@ -200,9 +178,6 @@ def setValue ( player: Player = None ):  # ranks the hand
 		player.kicker = li
 
 
-# dbl pair,pair,high
-
-
 def compareHands ( pList ):
 	rankList = [n.rank for n in pList]
 	winRank = []
@@ -210,7 +185,7 @@ def compareHands ( pList ):
 		if rankList[n] == max(rankList):
 			winRank.append(pList[n])
 	if len(winRank) == 1:
-		winner = winRank[0]
+		winner = winRank[0].num
 	else:
 		subRankcheck = -1
 		winsubRank = []
@@ -223,7 +198,7 @@ def compareHands ( pList ):
 			if n.subRank == subRankcheck:
 				winsubRank.append(n)
 		if len(winsubRank) == 1:
-			winner = winsubRank[0]
+			winner = winsubRank[0].num
 		else:
 			kickerCheck = -1
 			winKicker = []
@@ -236,51 +211,60 @@ def compareHands ( pList ):
 				if n.kicker == kickerCheck:
 					winKicker.append(n)
 			if len(winKicker) == 1:
-				winner = winKicker[0]
+				winner = winKicker[0].num
 			else:
-				winner = None
+				winner = -1
 	return winner
 
 
-if __name__ == "__main__":
+class Eval():
+	def __init__ ( self, length=10**5 ):
 
-	time0 = time.perf_counter()
+		time0 = time.perf_counter()
 
-	mega = {}  # mega ={card:[[[[p2 hand],[table],[winner]],[rep]],[win P1,winP2,tie]]}
+		Dump = {}  # Dump ={card:[[[[p2 hand],[table],[self.winner]],[rep]],[win P1,winP2,tie]]}
 
-	numP = 2
-	length = 0
+		numP = 2
+		self.length = length
 
-	suit1 = ['S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8', 'S9', 'S10', 'S11', 'S12', 'S13', 'S14']
-	suit2 = ['C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10', 'C11', 'C12', 'C13', 'C14']
+		self.suit1 = ['S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8', 'S9', 'S10', 'S11', 'S12', 'S13', 'S14']
+		self.suit2 = ['C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10', 'C11', 'C12', 'C13', 'C14']
 
-	ties = 0
+		for t in range(length):
 
-	for t in range(10**length):
+			self.r = setupPlayers(numP)  # sets up players
 
-		r = []
-		r = setupPlayers(numP)  # sets up players
+			self.deckNow = deckOG.copy()
+			rand.shuffle(self.deckNow)
+			# print(decknow)
+			self.table = []
+			for n in self.r:
+				self.dealToPlayer(n)
+			# for n in r[1:]:
+			#	decknow = dealToPlayer(decknow, n)
+			table = self.deal_to_Table()
 
-		decknow = deckOG.copy()
-		rand.shuffle(decknow)
-		# print(decknow)
-		r[0].cards = ["S2", "S3"]
-		r[1].cards = ["S4", "S5"]
-		table = ["S6", "S7", "S8", "S9", "S11"]
-		decknow.remove(r[0].cards[0])
-		decknow.remove(r[0].cards[1])
-		# for n in r[1:]:
-		#	decknow = dealToPlayer(decknow, n)
-		# decknow, table = deal_to_Table(decknow)
+			for n in self.r:
+				n.tot_cards = n.cards + self.table
+				n.tot_cards.sort()
+				setValue(n)
 
-		for n in r:
-			n.tot_cards = n.cards + table
-			n.tot_cards.sort()
-			setValue(n)
+			self.winner = compareHands(self.r)
 
-		winner = compareHands(r)
+		print(time.perf_counter() - time0)
 
-	# if t % 5000 == 0:
-	# print(t / (10**length)
-	print(winner.num)
-	print(time.perf_counter() - time0)
+	def dealToPlayer ( self, player: Player = None, cards_num=2 ):
+		for t in range(0, cards_num):
+			rnum = rand.randint(0, len(self.deckNow) - 1)
+			player.cards.append(self.deckNow[rnum])
+			self.deckNow.pop(rnum)
+
+	def deal_to_Table ( self, ):
+		table = []
+		for n in range(0, 5):
+			rnum = rand.randint(0, len(self.deckNow) - 1)
+			self.table.append(self.deckNow[rnum])
+			self.deckNow.pop(rnum)
+
+
+x = Eval()
