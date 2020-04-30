@@ -242,7 +242,7 @@ class Eval():
 				self.dealToPlayer(n)
 			# for n in r[1:]:
 			#	decknow = dealToPlayer(decknow, n)
-			table = self.deal_to_Table()
+			self.deal_to_Table()
 
 			for n in self.r:
 				n.tot_cards = n.cards + self.table
